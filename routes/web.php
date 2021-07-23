@@ -7,6 +7,8 @@ use App\Http\Controllers\FuncionarioController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\EleccionController;
 use App\Http\Controllers\ImeiautorizadoController;
+use App\Http\Controllers\VotoController;
+ 
 
 /*
 |--------------------------------------------------------------------------
@@ -22,10 +24,22 @@ use App\Http\Controllers\ImeiautorizadoController;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/pdf', 'CasillaController@pdf');
 
 Route::resources(['casilla'=>CasillaController::class]);
+
 Route::resources(['candidato'=>CandidatoController::class]);
 Route::resources(['funcionario'=>FuncionarioController::class]);
 Route::resources(['rol'=>RolController::class]);
 Route::resources(['eleccion'=>EleccionController::class]);
 Route::resources(['imeiautorizado'=>ImeiautorizadoController::class]);
+Route::resources(['voto'=>VotoController::class]);
+
+
+
+
+Route::namespace('App\Http\Controllers')->group(function () {
+    Route::get('/login','Auth\LoginController@index');
+    Route::get('/login/facebook', 'Auth\LoginController@redirectToFacebookProvider');
+    Route::get('/login/facebook/callback', 'Auth\LoginController@handleProviderFacebookCallback');
+});

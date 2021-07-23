@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Models\Rol;
-
+use App\Models\Voto;
+use App\Models\Votocandidato;
+use App\Models\Candidato;
+use App\Models\Casilla;
 use Illuminate\Support\Facades\DB;
-class RolController extends Controller
+
+class VotoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,8 +20,6 @@ class RolController extends Controller
     public function index()
     {
         //
-        $roles = Rol::all();
-        return view('rol/list', compact('roles'));
     }
 
     /**
@@ -29,7 +30,10 @@ class RolController extends Controller
     public function create()
     {
         //
-        return view('rol/create');
+        $casillas = Casilla::all();
+        $candidatos = Candidato::all();
+
+        return view('voto/create', compact('casillas','candidatos'));
     }
 
     /**
@@ -41,21 +45,37 @@ class RolController extends Controller
     public function store(Request $request)
     {
         $eleccion = DB::table('eleccion')
-                ->orderBy('id','DESC')
-                ->limit(1)
-                ->SELECT('id')
-                ->get();
-        $data = ["casilla_id" => $request->casilla_id, "acta" => $request->acta,"eleccion_id" => $eleccion->id];
-        print_r($data);
-        exit;
-        $request->validate([
-            'descripcion' => 'required|max:100'
-        ]);
+            ->orderBy('id','DESC')
+            ->limit(1)
+            ->SELECT('id')
+            ->get();
+        $acta="";
+        if ($request->hasFile('acta')) {
+            $acta = $request->acta->getClientOriginalName();
+            $request->acta->move(public_path('uploads'), $acta);
+        }
+        $data = ["casilla_id" => $request->casilla_id, "evidencia" =>$acta,"eleccion_id" => $eleccion[0]->id];
 
-        $data = ["id" => $request->id, "descripcion" => $request -> descripcion];
-        $rol = Rol::create($data); 
-        return redirect('rol')
-            ->with('success', $rol -> descripcion, 'Actualizado correctamente...');
+        $voto = Voto::create($data);
+        $candidatosvotos = array_filter(
+            $request->all(),
+            function ($f)  {
+                return ( str_starts_with($f,"candidato"));
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+
+        foreach ($candidatosvotos as $k=>$v)   {
+            $id= intval(substr($k,10));
+    
+           $votocandidato=[
+               "voto_id"=>$voto->id,
+               "candidato_id"=>$id,
+               "votos"=>$v
+           ];
+           Votocandidato::create($votocandidato);
+        }
+        return($this-> create());
     }
 
     /**
@@ -78,11 +98,6 @@ class RolController extends Controller
     public function edit($id)
     {
         //
-        $rol = Rol::find($id);
-        return view(
-            'rol/edit',
-            compact('rol')
-        );
     }
 
     /**
@@ -95,15 +110,6 @@ class RolController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $request->validate([
-            'id' => 'required',
-            'descripcion' => 'required|max:100'
-        ]);
-
-        $data = ["id" => $request->id, "descripcion" => $request -> descripcion];
-        Rol::whereId($id)->update($data);
-        return redirect('rol')
-            ->with('success', 'Actualizado correctamente...');
     }
 
     /**
@@ -115,8 +121,5 @@ class RolController extends Controller
     public function destroy($id)
     {
         //
-        $rol = Rol::find($id);
-        $rol->delete();
-        return redirect('rol');
     }
 }

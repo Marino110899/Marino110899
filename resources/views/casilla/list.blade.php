@@ -30,10 +30,12 @@
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-danger" type="submit" onclick="return confirm('Esta seguro de borrar {{$casilla->ubicacion}}')">Del</button>
+                            
                     </form>
                 </td>
             </tr>
             @endforeach
+            <a class="btn btn-primary" href="{{ URL::to('/pdf') }}">Exportar pdf</a>
         </tbody>
     </table>
     <div>

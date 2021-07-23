@@ -21,4 +21,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 });
 
-Route::resources(['candidato'=>CandidatoController::class]);
+//Route::resources(['candidato'=>CandidatoController::class]);

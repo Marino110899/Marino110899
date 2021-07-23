@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Models\Casilla;
 
+use Barryvdh\DomPDF\Facade as PDF; //--- Se agregó esta línea
+
 class CasillaController extends Controller
 {
     /**
@@ -13,6 +15,12 @@ class CasillaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function pdf()
+    {
+        $casillas = Casilla::all();
+        $pdf = PDF::loadView('casilla/list', ['casillas'=>$casillas]);
+        return $pdf->download('archivo.pdf');
+    }  
     public function index()
     {
         $casillas = Casilla::all();
@@ -25,6 +33,9 @@ class CasillaController extends Controller
      */
     public function create()
     {
+        //$casillas = Casilla::all();
+        //$pdf = PDF::loadView('casilla/list', ['casillas'=>$casillas]//);
+        //return $pdf->download('archivo.pdf');
         return view('casilla/create');
     }
     /**
